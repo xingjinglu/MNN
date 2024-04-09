@@ -145,7 +145,11 @@ Module* Module::load(const std::vector<std::string>& inputs, const std::vector<s
 }
 
 Module* Module::load(const std::vector<std::string>& inputs, const std::vector<std::string>& outputs, const char* fileName, const std::shared_ptr<MNN::Express::Executor::RuntimeManager> rtMgr, const Module::Config* config) {
+#ifdef MNN_MMAP
+     MmapStorage<uint8_t> buffer; 
+#else
     AutoStorage<uint8_t> buffer;
+#endif
     {
         FileLoader loader(fileName);
         if (!loader.valid()) {

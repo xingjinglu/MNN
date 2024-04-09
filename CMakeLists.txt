@@ -193,6 +193,7 @@ option(MNN_CUDA "Enable CUDA" OFF)
 option(MNN_TENSORRT "Enable TensorRT" OFF)
 option(MNN_COREML "Enable CoreML" OFF)
 option(MNN_NNAPI "Enable NNAPI" OFF)
+option(MNN_MMAP "Enable NNAPI" ON)
 
 option(MNN_CUDA_PROFILE "Enable CUDA profile" OFF)
 

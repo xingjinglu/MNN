@@ -37,12 +37,20 @@ FileLoader::~FileLoader() {
         fclose(mFile);
     }
     for (auto iter : mBlocks) {
+#ifdef MNN_MMAP
+        MmapFree(iter.second);
+#else
         MNNMemoryFreeAlign(iter.second);
+#endif
     }
 }
 
 bool FileLoader::read() {
+#ifdef MNN_MMAP
+    auto block = MmapAllocAlign(gCacheSize, MNN_MEMORY_ALIGN_DEFAULT);
+#else
     auto block = MNNMemoryAllocAlign(gCacheSize, MNN_MEMORY_ALIGN_DEFAULT);
+#endif
     if (nullptr == block) {
         MNN_PRINT("Memory Alloc Failed\n");
         return false;
@@ -52,7 +60,11 @@ bool FileLoader::read() {
     mBlocks.push_back(std::make_pair(size, block));
 
     while (size == gCacheSize) {
+#ifdef MNN_MMAP
+    auto block = MmapAllocAlign(gCacheSize, MNN_MEMORY_ALIGN_DEFAULT);
+#else
         block = MNNMemoryAllocAlign(gCacheSize, MNN_MEMORY_ALIGN_DEFAULT);
+#endif
         if (nullptr == block) {
             MNN_PRINT("Memory Alloc Failed\n");
             return false;
@@ -60,7 +72,11 @@ bool FileLoader::read() {
         size = fread(block, 1, gCacheSize, mFile);
         if (size > gCacheSize) {
             MNN_PRINT("Read file Error\n");
+#ifdef MNN_MMAP
+            MmapFree(block);
+#else
             MNNMemoryFreeAlign(block);
+#endif
             return false;
         }
         mTotalSize += size;
