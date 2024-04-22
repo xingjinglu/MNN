@@ -162,6 +162,7 @@ class MmapStorage{
       alloc(size);
       std::cout<<"MmapStorage: size = " << size << std::endl;
 
+
       return 0;
     }
 
@@ -295,7 +296,7 @@ class BufferStorageMmap{
     }
 
 
-    
+   
     // allocated_size = size + offset.
     size_t offset = 0;
     size_t allocated_size = 0;
