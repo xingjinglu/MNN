@@ -30,7 +30,7 @@ class MmapStorage{
           mFd_ = 0;
         }
         if(mFilePath_ != ""){
-          if(remove(mFilePath_) != 0)
+          if(remove(mFilePath_.c_str()) != 0)
             MNN_PRINT("%s:%s:%d: Error, remove file failed\n", __FILE__, __FUNCTION__, __LINE__);
 
           mFilePath_ = "";
@@ -277,6 +277,8 @@ class BufferStorageMmap{
     size_t offset = 0;
     size_t allocated_size = 0;
     uint8_t * storage = nullptr;
+    std::string file_path = 0;
+    int fd = 0;
 };
 
 void *MmapAllocAlign(size_t size, size_t alignment=8);
