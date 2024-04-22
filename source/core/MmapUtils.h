@@ -174,7 +174,7 @@ class MmapStorage{
         }
         if(mFd_ != 0) close(mFd_);
         if(mFilePath_ != ""){
-          if(remove(mFilePath_) != 0)
+          if(remove(mFilePath_.c_str()) != 0)
             MNN_PRINT("%s:%s:%d; delete %s failed\n", __FILE__, __FUNCTION__, __LINE__, mFilePath_);
         }
         mData_ = nullptr;
@@ -220,6 +220,15 @@ class BufferStorageMmap{
     ~BufferStorageMmap(){
       if(storage != nullptr){
         munmap(storage, (allocated_size + offset));
+
+        if(file_path != ""){
+          if(remove(file_path.c_str()) != 0)
+            MNN_PRINT("%s:%s:%d: Error, remove file failed\n", __FILE__, __FUNCTION__, __LINE__);
+
+          file_path = "";
+        }
+
+
         storage = nullptr;
         offset = 0;
         allocated_size = 0;
@@ -234,22 +243,36 @@ class BufferStorageMmap{
       return storage + offset;
     } 
 
-    int alloc(size_t size, size_t in_offset=0)
-    {
 
-      storage =(uint8_t*)(mmap(NULL, size + in_offset, PROT_WRITE|PROT_READ, 
-            MAP_PRIVATE|MAP_ANONYMOUS, -1, 0));
-      if(storage == MAP_FAILED){
-        std::cerr<<"Failed to mmap" <<std::endl;
+    int alloc(int size, size_t in_offset = 0)
+    {
+      std::string filePath = "example.txt";
+      std::ofstream file(filePath);
+      if(file.is_open())
+        file.close();
+      else{
+        MNN_PRINT("%s:%s:%d: Error, failed to create file\n", __FILE__, __FUNCTION__, __LINE__);
         return -1;
       }
 
-      std::cout<<"MmapStorage: size = " << size << std::endl;
+      int fd = open(filePath.c_str(), O_RDWR);
+      ftruncate(fd, size + in_offset);
+      storage =static_cast<uint8_t*>(mmap(NULL, size + in_offset, PROT_WRITE|PROT_READ, 
+            MAP_SHARED, fd, 0));
+
+      if(storage == MAP_FAILED){
+        MNN_PRINT("%s:%s:%d: Error, failed to mmap\n", __FILE__, __FUNCTION__, __LINE__);
+        return -1;
+      }
+
+      std::cout<<"MmapStorage: size = " << (size + in_offset) << std::endl;
+      close(fd);
       allocated_size = size + in_offset;
-      offset = in_offset;
+      file_path = filePath;
 
       return 0;
     }
+
 
     // size: user-can-use memory size.
     // allocated_size_ = size + offset.
