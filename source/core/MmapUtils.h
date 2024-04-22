@@ -6,6 +6,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <iostream>
+#include <cstdio>
 
 //#define NDEBUG
 #include <cassert>
@@ -23,11 +24,43 @@ class MmapStorage{
       if(mData_ != nullptr){
         std::cout<<"MmapStorage::release size = " << mSize_ * sizeof(T) << std::endl;
         munmap(mData_, mSize_ * sizeof(T));
+        if(mFd_ != 0){
+          close(mFd_);
+          mFd_ = 0;
+        }
+        if(mFilePath_ != ""){
+          if(remove(mFilePath_) != 0)
+            MNN_PRINT("%s:%s:%d: Error, remove file failed\n", __FILE__, __FUNCTION__, __LINE__);
+
+          mFilePath_ = "";
+        }
+
+
         mData_ = nullptr;
         mSize_ = 0;
       }
+    
 
     }
+
+    // size: number of element.
+    int alloc(int size, int fd)
+    {
+      ftruncate(fd, size * sizeof(T));
+      mData_ =static_cast<T*>(mmap(NULL, size * sizeof(T), PROT_WRITE|PROT_READ, 
+            MAP_SHARED, fd, 0));
+
+      if(mData_ == MAP_FAILED){
+        MNN_PRINT("%s:%s:%d: Error, failed to mmap\n", __FILE__, __FUNCTION__, __LINE__);
+        return -1;
+      }
+      mSize_ = size;
+      mFd_ = fd;
+
+      return 0;
+    }
+
+
 
     // size: number of element.
     MmapStorage(int size)
@@ -117,6 +150,8 @@ class MmapStorage{
     T *mData_ = nullptr;
     // number of element with type T.
     int mSize_ = 0; 
+    int mFd_ = 0;
+    std::string mFilePath_ = "";
 
 };
 
