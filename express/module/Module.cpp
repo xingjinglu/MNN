@@ -11,6 +11,7 @@
 #include <MNN/expr/ExecutorScope.hpp>
 #include "PipelineModule.hpp"
 #include "core/FileLoader.hpp"
+#include "core/FileLoaderMmap.hpp"
 #include "backend/cpu/CPUBackend.hpp"
 #include "MNN_generated.h"
 #include "Utils.hpp"
@@ -146,24 +147,39 @@ Module* Module::load(const std::vector<std::string>& inputs, const std::vector<s
 
 Module* Module::load(const std::vector<std::string>& inputs, const std::vector<std::string>& outputs, const char* fileName, const std::shared_ptr<MNN::Express::Executor::RuntimeManager> rtMgr, const Module::Config* config) {
 #ifdef MNN_MMAP
+    MNN_PRINT("MNN_MAP is on\n");
      MmapStorage<uint8_t> buffer; 
 #else
+    MNN_PRINT("MNN_MAP is off\n");
     AutoStorage<uint8_t> buffer;
 #endif
     {
-        FileLoader loader(fileName);
+#ifdef MNN_MMAP
+      FileLoaderMmap loader(fileName);
+#else
+      FileLoader loader(fileName);
+#endif
         if (!loader.valid()) {
             MNN_ERROR("Error for open %s\n", fileName);
             return nullptr;
         }
+#ifdef MNN_MMAP
+        MNN_PRINT("FileSize = %d \n", loader.get_filesize());
+        buffer.reset(loader.get_filesize());
+        loader.read_into_oneblock(buffer.get());
+#else
         loader.read();
+#endif
         if (!loader.valid()) {
             return nullptr;
         }
+
+#ifndef MNN_MMAP
         loader.merge(buffer);
         if (buffer.get() == nullptr) {
             return nullptr;
         }
+#endif
     }
     return load(inputs, outputs, buffer.get(), buffer.size(), rtMgr, config);
 }

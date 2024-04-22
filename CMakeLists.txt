@@ -25,6 +25,8 @@ set(CMAKE_MODULE_PATH
   ${CMAKE_MODULE_PATH}
   "${CMAKE_CURRENT_LIST_DIR}/cmake"
 )
+set(CMAKE_BUILD_TYPE "Debug")
+
 # build options
 option(MNN_USE_SYSTEM_LIB "For opencl and vulkan, use system lib or use dlopen" OFF)
 option(MNN_BUILD_HARD "Build -mfloat-abi=hard or not" OFF)
@@ -193,7 +195,7 @@ option(MNN_CUDA "Enable CUDA" OFF)
 option(MNN_TENSORRT "Enable TensorRT" OFF)
 option(MNN_COREML "Enable CoreML" OFF)
 option(MNN_NNAPI "Enable NNAPI" OFF)
-option(MNN_MMAP "Enable NNAPI" ON)
+option(MNN_MMAP "Enable MMAP" ON)
 
 option(MNN_CUDA_PROFILE "Enable CUDA profile" OFF)
 
@@ -205,6 +207,11 @@ if (MNN_USE_THREAD_POOL)
     message(STATUS "Use Threadpool, forbid openmp")
     set(MNN_OPENMP OFF)
     add_definitions(-DMNN_USE_THREAD_POOL)
+endif()
+
+if (MNN_MMAP)
+    message(STATUS "Use MMAP")
+    add_definitions(-DMNN_MMAP)
 endif()
 
 # When build Android based on arm32 by MTL, force turn off MNN_ARM82
@@ -241,6 +248,7 @@ message(STATUS "\tNNAPI: ${MNN_NNAPI}")
 message(STATUS "\tCUDA: ${MNN_CUDA}")
 message(STATUS "\tOpenMP: ${MNN_OPENMP}")
 message(STATUS "\tBF16: ${MNN_SUPPORT_BF16}")
+message(STATUS "\tMMAP: ${MNN_MMAP}")
 message(STATUS "\tThreadPool: ${MNN_USE_THREAD_POOL}")
 message(STATUS "\tHidden: ${MNN_HIDDEN}")
 message(STATUS "\tBuild Path: ${CMAKE_CURRENT_BINARY_DIR}")

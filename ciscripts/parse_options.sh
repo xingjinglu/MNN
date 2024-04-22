@@ -6,7 +6,8 @@
 #   - arm_linux_32
 #   - arm_linux_64
 #   - x86_linux
-platform="all"
+#   - all
+platform="x86_linux"
 
 # Option to build with opencl.
 use_opencl=0
@@ -20,7 +21,7 @@ use_vulkan=0
 # Option to build with openmp multithreads library.
 use_openmp=0
 
-build_threads=1
+build_threads=64
 
 # Option to clear the build history.
 clean=0

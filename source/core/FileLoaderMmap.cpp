@@ -1,17 +1,11 @@
-//
-//  FileLoader.cpp
-//  MNN
-//
-//  Created by MNN on 2019/07/04.
-//  Copyright © 2018, Alibaba Group Holding Limited
-//
 
-#include "core/FileLoader.hpp"
+#include "core/FileLoaderMmap.hpp"
 #if defined(_MSC_VER)
 #include "Windows.h"
 #endif
+
 namespace MNN {
-FileLoader::FileLoader(const char* file) {
+FileLoaderMmap::FileLoaderMmap(const char* file) {
 #if defined(_MSC_VER)
     wchar_t wFilename[1024];
     if (0 == MultiByteToWideChar(CP_ACP, 0, file, -1, wFilename, sizeof(wFilename))) {
@@ -29,23 +23,24 @@ FileLoader::FileLoader(const char* file) {
 #else
     mFile = fopen(file, "rb");
 #endif
+      std::fseek(mFile, 0, SEEK_END);
+      int size = std::ftell(mFile);
+      mFileSize =  size;
+      std::fseek(mFile, 0, SEEK_SET);
+
     mFilePath = file;
 }
 
-FileLoader::~FileLoader() {
+FileLoaderMmap::~FileLoaderMmap() {
     if (nullptr != mFile) {
         fclose(mFile);
     }
     for (auto iter : mBlocks) {
-#ifdef MNN_MMAP
         MmapFree(iter.second);
-#else
-        MNNMemoryFreeAlign(iter.second);
-#endif
     }
 }
 
-bool FileLoader::read() {
+bool FileLoaderMmap::read() {
 #ifdef MNN_MMAP
     auto block = MmapAllocAlign(gCacheSize, MNN_MEMORY_ALIGN_DEFAULT);
 #else
@@ -89,7 +84,27 @@ bool FileLoader::read() {
     return true;
 }
 
-bool FileLoader::write(const char* filePath, std::pair<const void*, size_t> cacheInfo) {
+bool FileLoaderMmap::read_into_oneblock(void *block)
+{
+  if (nullptr == block) {
+    MNN_PRINT("buffer is nullptr\n");
+    return false;
+  }
+  auto size  = fread(block, 1, mFileSize, mFile);
+  mTotalSize = size;
+
+  //mBlocks.push_back(std::make_pair(size, block));
+
+
+  if (ferror(mFile)) {
+    return false;
+  }
+  return true;
+}
+
+
+
+bool FileLoaderMmap::write(const char* filePath, std::pair<const void*, size_t> cacheInfo) {
     FILE* f = fopen(filePath, "wb");
     if (nullptr == f) {
         MNN_ERROR("Open %s error\n", filePath);
@@ -115,7 +130,8 @@ bool FileLoader::write(const char* filePath, std::pair<const void*, size_t> cach
     return true;
 }
 
-bool FileLoader::merge(AutoStorage<uint8_t>& buffer) {
+#if 0
+bool FileLoaderMmap::merge(AutoStorage<uint8_t>& buffer) {
     buffer.reset((int)mTotalSize);
     if (buffer.get() == nullptr) {
         MNN_PRINT("Memory Alloc Failed\n");
@@ -130,7 +146,7 @@ bool FileLoader::merge(AutoStorage<uint8_t>& buffer) {
     return true;
 }
 
-bool FileLoader::merge(MmapStorage<uint8_t>& buffer) {
+bool FileLoaderMmap::merge(MmapStorage<uint8_t>& buffer) {
     MNN_PRINT("%s:%d MMAP \n", __FUNCTION__, __LINE__);
     buffer.reset((int)mTotalSize);
     if (buffer.get() == nullptr) {
@@ -145,11 +161,13 @@ bool FileLoader::merge(MmapStorage<uint8_t>& buffer) {
     }
     return true;
 }
-int FileLoader::offset(int64_t offset) {
+#endif 
+
+int FileLoaderMmap::offset(int64_t offset) {
     return fseek(mFile, offset, SEEK_SET);
 }
 
-bool FileLoader::read(char* buffer, int64_t size) {
+bool FileLoaderMmap::read(char* buffer, int64_t size) {
     return fread(buffer, 1, size, mFile) == size;
 }
 

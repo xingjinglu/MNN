@@ -12,6 +12,7 @@
 #include <stdint.h>
 #include <string.h>
 #include "MNNMemoryUtils.h"
+#include "core/MmapUtils.h"
 
 namespace MNN {
 template <typename T>
@@ -39,7 +40,14 @@ public:
      */
     ~AutoStorage() {
         if (NULL != mData) {
+#ifdef MNN_MMAP
+          if(useMmap){
+            MmapFree(mData);
+            MNN_PRINT("AutoStorage ~ Mmap: %d \n",mSize);
+          }
+#else
             MNNMemoryFreeAlign(mData);
+#endif
         }
     }
 
@@ -83,7 +91,15 @@ public:
      */
     void release() {
         if (NULL != mData) {
+#ifdef MNN_MMAP
+          if(useMmap){
+            MmapFree(mData);
+            useMmap= false;
+            MNN_PRINT("AutoStorage ~ Mmap: %d \n",mSize);
+          }
+#else
             MNNMemoryFreeAlign(mData);
+#endif
             mData = NULL;
             mSize = 0;
         }
@@ -104,9 +120,18 @@ public:
         return mData;
     }
 
+#ifdef MNN_MMAP
+    void setMmap(bool isMmap){
+      useMmap = isMmap;
+    }
+#endif
+
 private:
     T* mData  = NULL;
     int mSize = 0;
+#ifdef MNN_MMAP
+    bool useMmap = false;
+#endif
 };
 
 /** Auto Release Class*/
@@ -227,12 +252,66 @@ struct BufferStorage {
     }
     ~ BufferStorage() {
         if (nullptr != storage) {
+#ifdef MNN_MMAP
+          if(use_mmap_alloc){
+            if(self_allocated){
+              std::cout<<"BufferStorage Mmap release: size = " << allocated_size << std::endl;
+              munmap(storage, allocated_size);
+              storage = nullptr;
+              offset = 0;
+              allocated_size = 0;
+              use_mmap_alloc = false;
+              self_allocated = false;
+            }
+          }else
             delete [] storage;
+#else
+            delete [] storage;
+#endif
         }
     }
+
+#ifdef MNN_MMAP
+    int alloc(size_t size, size_t in_offset=0)
+    {
+
+      storage =(uint8_t*)(mmap(NULL, size + in_offset, PROT_WRITE|PROT_READ, 
+            MAP_PRIVATE|MAP_ANONYMOUS, -1, 0));
+      if(storage == MAP_FAILED){
+        std::cerr<<"Failed to mmap" <<std::endl;
+        return -1;
+      }
+
+      allocated_size = size + in_offset;
+      offset = in_offset;
+      use_mmap_alloc = true;
+      self_allocated = true;
+      std::cout<<"BufferStorage Mmap: size = " << allocated_size << std::endl;
+
+      return 0;
+    }
+#endif
+#ifdef MNN_MMAP
+    int set(uint8_t *data, size_t size, size_t in_offset=0)
+    {
+
+      storage = data;
+      allocated_size = size + in_offset;
+      offset = in_offset;
+      use_mmap_alloc = true;
+      std::cout<<"BufferStorage Mmap: size = " << allocated_size << std::endl;
+
+      return 0;
+    }
+#endif
+
     size_t allocated_size;
     size_t offset;
     uint8_t* storage = nullptr;
+#ifdef MNN_MMAP
+    bool use_mmap_alloc = false;
+    bool self_allocated = false;
+#endif
 };
 
 } // namespace MNN

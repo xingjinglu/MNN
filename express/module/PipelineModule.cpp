@@ -16,6 +16,7 @@
 #include "Utils.hpp"
 #include "core/Backend.hpp"
 #include "core/WrapExecution.hpp"
+#include "core/MmapUtils.h"
 #include "utils/InitNet.hpp"
 #include "RuntimeAttr.hpp"
 #include "geometry/GeometryComputer.hpp"
@@ -594,14 +595,20 @@ Module* PipelineModule::load(const std::vector<std::string>& inputs, const std::
     std::map<std::string, SubGraph> subGraphMap;
     _createSubGraph(net, rtMgr, config, subGraphMap);
     std::shared_ptr<BufferStorage> bufferStorage(new BufferStorage);
+#ifdef MNN_MMAP
+    //bufferStorage->alloc(length, 0);
+    bufferStorage->set(const_cast<uint8_t*>(buffer), length);
+#else
     bufferStorage->storage = new uint8_t[length];
+#endif
     ::memcpy(bufferStorage->storage, buffer, length);
     bufferStorage->offset = 0;
     bufferStorage->allocated_size = length;
     return load(inputs, outputs, bufferStorage, rtMgr, config, subGraphMap);
 }
 
-Module* PipelineModule::load(const std::vector<std::string>& inputs, const std::vector<std::string>& outputs, std::shared_ptr<BufferStorage> bufferStorage, std::shared_ptr<MNN::Express::Executor::RuntimeManager> rtMgr, const Module::Config* config, std::map<std::string, SubGraph>& subGraphMap) {
+Module* PipelineModule::load(const std::vector<std::string>& inputs, const std::vector<std::string>& outputs, std::shared_ptr<BufferStorage> bufferStorage, std::shared_ptr<MNN::Express::Executor::RuntimeManager> rtMgr, const Module::Config* config, std::map<std::string, SubGraph>& subGraphMap) 
+{
     std::shared_ptr<Schedule::ScheduleInfo> sharedConst;
     auto buffer = bufferStorage->buffer();
     auto length = bufferStorage->size();

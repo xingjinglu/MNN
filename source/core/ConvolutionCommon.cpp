@@ -238,7 +238,11 @@ static int8_t *ReadQuanData_c(unsigned char *&s, size_t* len, ConvolutionCommon:
             break;
         }
         StreamSizeRead(idxBuf, 1, idxBufSize, s);
+#ifdef MNN_MMAP
+        blob  = (int8_t *)MmapAllocAlign((size_t)dataCnt);
+#else
         blob  = (int8_t *)MNNMemoryAllocAlignZeroAlign((size_t)dataCnt);
+#endif
         if (nullptr == blob) {
             break;
         }
@@ -526,6 +530,10 @@ std::shared_ptr<ConvolutionCommon::Int8Common> ConvolutionCommon::load(const Con
             return nullptr;
         }
         result->weight.set(buffer, weightLength);
+#ifdef MNN_MMAP
+        bool use_mmap = true;
+        result->weight.setMmap(use_mmap);
+#endif
     }
     result->alpha.reset(alpha_size);
     if (nullptr == result->alpha.get()) {
