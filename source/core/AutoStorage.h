@@ -12,7 +12,7 @@
 #include <stdint.h>
 #include <string.h>
 #include "MNNMemoryUtils.h"
-#include "core/MmapUtils.h"
+#include "core/MmapUtilsIos.hpp"
 
 namespace MNN {
 template <typename T>
@@ -42,7 +42,7 @@ public:
         if (NULL != mData) {
 #ifdef MNN_MMAP
           if(useMmap){
-            MmapFree(mData);
+            MemoryFreeAlignMmap(mData);
             MNN_PRINT("AutoStorage ~ Mmap: %d \n",mSize);
           }
 #else
@@ -93,7 +93,7 @@ public:
         if (NULL != mData) {
 #ifdef MNN_MMAP
           if(useMmap){
-            MmapFree(mData);
+            MemoryFreeAlignMmap(mData);
             useMmap= false;
             MNN_PRINT("AutoStorage ~ Mmap: %d \n",mSize);
           }

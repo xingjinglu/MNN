@@ -239,7 +239,7 @@ static int8_t *ReadQuanData_c(unsigned char *&s, size_t* len, ConvolutionCommon:
         }
         StreamSizeRead(idxBuf, 1, idxBufSize, s);
 #ifdef MNN_MMAP
-        blob  = (int8_t *)MmapAllocAlign((size_t)dataCnt);
+        blob  = (int8_t *)MemoryAllocAlignMmap((size_t)dataCnt, "test2.txt");
 #else
         blob  = (int8_t *)MNNMemoryAllocAlignZeroAlign((size_t)dataCnt);
 #endif

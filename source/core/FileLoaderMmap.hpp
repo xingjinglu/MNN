@@ -1,8 +1,12 @@
+#pragma once
+
 #include<cstddef>
 #include <vector>
 #include <mutex>
 #include "core/AutoStorage.h"
-#include "core/MmapUtils.h"
+#ifdef MNN_MMAP
+#include "core/MmapUtilsIos.hpp"
+#endif
 
 namespace MNN{
 
@@ -24,13 +28,16 @@ namespace MNN{
         return mTotalSize;
       }
 
-      bool merge(MmapStorage<uint8_t>& buffer);
+      bool merge(MmapStorage<uint8_t>& buffer){
+
+        return true;
+      }
 
       int offset(int64_t offset);
 
       bool read(char* buffer, int64_t size);
 
-      int get_filesize()
+      size_t get_filesize()
       {
         return mFileSize;
       }
@@ -41,6 +48,6 @@ namespace MNN{
       static const int gCacheSize = 4096;
       size_t mTotalSize           = 0;
       const char* mFilePath       = nullptr;
-      int mFileSize = 0;
+      size_t mFileSize = 0;
   };
 }

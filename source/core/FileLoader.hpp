@@ -9,7 +9,7 @@
 #include <vector>
 #include <mutex>
 #include "core/AutoStorage.h"
-#include "core/MmapUtils.h"
+#include "core/MmapUtilsIos.hpp"
 namespace MNN {
 class MNN_PUBLIC FileLoader {
 public:

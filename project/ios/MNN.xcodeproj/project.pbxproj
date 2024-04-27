@@ -437,6 +437,10 @@
 		5B46CCAA2BDC1E43000180D1 /* Arm82WinogradOptFunc.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5B46CC702BDC1E42000180D1 /* Arm82WinogradOptFunc.hpp */; };
 		5B46CCAB2BDC1E43000180D1 /* CMakeLists.txt in Resources */ = {isa = PBXBuildFile; fileRef = 5B46CC712BDC1E42000180D1 /* CMakeLists.txt */; };
 		5B46CCAD2BDC21BC000180D1 /* MNNAsmGlobal.h in Headers */ = {isa = PBXBuildFile; fileRef = 5B46CCAC2BDC21BC000180D1 /* MNNAsmGlobal.h */; };
+		5B46CCAE2BDD5648000180D1 /* MmapUtilsIos.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5B1821DD2BDA0B3D00575B5F /* MmapUtilsIos.mm */; };
+		5B46CCAF2BDD5648000180D1 /* MmapProxy.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5B1821D72BD7970A00575B5F /* MmapProxy.mm */; };
+		5B46CCB02BDD5648000180D1 /* FileLoaderMmap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5B1821D32BD66C9500575B5F /* FileLoaderMmap.cpp */; };
+		5B46CCB12BDD5648000180D1 /* MmapUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5B1821D12BD66C1700575B5F /* MmapUtils.cpp */; };
 		6A131E3F25823349002EC3D6 /* PluginShapeInference.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6A131E3D25823349002EC3D6 /* PluginShapeInference.cpp */; };
 		6A131E4025823349002EC3D6 /* PluginKernel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6A131E3E25823349002EC3D6 /* PluginKernel.cpp */; };
 		9200049921EDBDF600BCE892 /* TensorTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9200045D21EDBDF600BCE892 /* TensorTest.cpp */; };
@@ -3545,6 +3549,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5B46CCAE2BDD5648000180D1 /* MmapUtilsIos.mm in Sources */,
+				5B46CCAF2BDD5648000180D1 /* MmapProxy.mm in Sources */,
+				5B46CCB02BDD5648000180D1 /* FileLoaderMmap.cpp in Sources */,
+				5B46CCB12BDD5648000180D1 /* MmapUtils.cpp in Sources */,
 				92FF039B23AA0B5A00AC97F6 /* CommonOptFunction.cpp in Sources */,
 				92FF04B823AA0BFB00AC97F6 /* MNNMemoryUtils.cpp in Sources */,
 				950B29002A0C9B4D0002F454 /* MNNScaleAndAddBiasInt8.S in Sources */,
@@ -4392,6 +4400,8 @@
 					"USE_LZ4_FLAG=1",
 					"MNN_USE_SPARSE_COMPUTE=1",
 					"MNN_LOW_MEMORY=1",
+					"MNN_MMAP_IOS=1",
+					"MNN_MMAP=1",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_WARN_SHADOW = NO;
@@ -4459,6 +4469,8 @@
 					"USE_LZ4_FLAG=1",
 					"MNN_USE_SPARSE_COMPUTE=1",
 					"MNN_LOW_MEMORY=1",
+					"MNN_MMAP=1",
+					"MNN_MMAP_IOS=1",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_WARN_SHADOW = YES;

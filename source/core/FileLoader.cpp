@@ -38,7 +38,7 @@ FileLoader::~FileLoader() {
     }
     for (auto iter : mBlocks) {
 #ifdef MNN_MMAP
-        MmapFree(iter.second);
+        MemoryFreeAlignMmap(iter.second);
 #else
         MNNMemoryFreeAlign(iter.second);
 #endif
@@ -47,7 +47,7 @@ FileLoader::~FileLoader() {
 
 bool FileLoader::read() {
 #ifdef MNN_MMAP
-    auto block = MmapAllocAlign(gCacheSize, MNN_MEMORY_ALIGN_DEFAULT);
+    auto block = MemoryAllocAlignMmap(gCacheSize, "test2.txt", MNN_MEMORY_ALIGN_DEFAULT);
 #else
     auto block = MNNMemoryAllocAlign(gCacheSize, MNN_MEMORY_ALIGN_DEFAULT);
 #endif
@@ -61,7 +61,7 @@ bool FileLoader::read() {
 
     while (size == gCacheSize) {
 #ifdef MNN_MMAP
-    block = MmapAllocAlign(gCacheSize, MNN_MEMORY_ALIGN_DEFAULT);
+    block = MemoryAllocAlignMmap(gCacheSize, "test2.txt", MNN_MEMORY_ALIGN_DEFAULT);
 #else
         block = MNNMemoryAllocAlign(gCacheSize, MNN_MEMORY_ALIGN_DEFAULT);
 #endif
@@ -73,7 +73,7 @@ bool FileLoader::read() {
         if (size > gCacheSize) {
             MNN_PRINT("Read file Error\n");
 #ifdef MNN_MMAP
-            MmapFree(block);
+            MemoryFreeAlignMmap(block);
 #else
             MNNMemoryFreeAlign(block);
 #endif

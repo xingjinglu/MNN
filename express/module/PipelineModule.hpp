@@ -11,7 +11,7 @@
 #include <MNN/expr/Module.hpp>
 #include <MNN/expr/ExprCreator.hpp>
 #include "core/AutoStorage.h"
-#include "core/MmapUtils.h"
+#include "core/MmapUtilsIos.hpp"
 #include "utils/InitNet.hpp"
 
 namespace MNN {

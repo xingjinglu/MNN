@@ -10,8 +10,10 @@
 #include <MNN/expr/ExprCreator.hpp>
 #include <MNN/expr/ExecutorScope.hpp>
 #include "PipelineModule.hpp"
-#include "core/FileLoader.hpp"
+#ifdef MNN_MMAP
 #include "core/FileLoaderMmap.hpp"
+#endif
+#include "core/FileLoader.hpp"
 #include "backend/cpu/CPUBackend.hpp"
 #include "MNN_generated.h"
 #include "Utils.hpp"
