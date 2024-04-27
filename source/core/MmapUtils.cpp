@@ -24,7 +24,7 @@ void *MemoryAllocAlignMmap(size_t size, std::string file_name, size_t alignment)
   //std::string file_name = "test.txt";
   size_t allocated_size = size + 8;
 
-#ifdef MNN_MMAP_IOS2
+#ifdef MNN_MMAP_IOS
   std::string filePath = createFile(file_name, allocated_size);
   if(filePath == "")
     printf("%s:%d:%s: Error, failed to createFile, %s\n", __FILE__, __LINE__, __FUNCTION__, strerror(errno));
