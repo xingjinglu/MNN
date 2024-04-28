@@ -8,7 +8,10 @@
 
 #include "core/BufferAllocator.hpp"
 #include "core/Macro.h"
-
+#include <sstream>
+#ifdef MNN_MMAP
+#include "core/MmapUtilsIos.hpp"
+#endif
 // #define DUMP_USAGE
 //#define MNN_DEBUG_MEMORY
 namespace MNN {
@@ -38,6 +41,7 @@ void MemChunk::attach(Tensor* tensor) {
         mNode->tensors.push_back(tensor);
     }
 }
+size_t MmapCnt = 0;
 class DefaultAllocator : public BufferAllocator::Allocator {
 public:
     DefaultAllocator() {
@@ -47,12 +51,24 @@ public:
         // Do nothing
     }
     virtual MemChunk onAlloc(size_t size, size_t align) {
+#ifdef MNN_MMAP
+      std::stringstream ss;
+      MmapCnt++;
+      ss <<"test3_" << MmapCnt <<".txt";
+        return MemChunk(MemoryAllocAlignMmap(size, ss.str(), MNN_MEMORY_ALIGN_DEFAULT), 0);
+#else
         return MemChunk(MNNMemoryAllocAlign(size, MNN_MEMORY_ALIGN_DEFAULT), 0);
+#endif
     }
     virtual void onRelease(MemChunk chunk) {
         MNN_ASSERT(chunk.second == 0);
+#ifdef MNN_MMAP
+        MemoryFreeAlignMmap(chunk.first);
+#else
         MNNMemoryFreeAlign(chunk.first);
+#endif
     }
+    
 };
 class RecurseAllocator : public BufferAllocator::Allocator {
 public:

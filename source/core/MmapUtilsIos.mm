@@ -91,7 +91,7 @@ std::string createFile(std::string fileName, size_t size)
     NSDictionary *attributes = @{NSFilePosixPermissions: @420};
     BOOL success = [fileManager createFileAtPath:filePathNs contents:nil attributes:attributes];
     if (success) {
-      printf("File created successfully\n");
+      printf("File created successful: %s\n", filePath.c_str());
     } else {
       printf("%s:%d: Error failed to create file",__FILE__, __LINE__);
       return "";
